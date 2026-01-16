@@ -1,0 +1,12 @@
+google.com, pub-9582048298711309, DIRECT, f08c47fec0942fa0
+Problems Report
+2 problems have been reported during the execution of build `android` for the following tasks:`:app:assembleDebug :app:assembleDebugUnitTest :app:assembleDebugAndroidTest`
+Messages (2)
+Group (2)
+File Locations (2)
+Plugin Locations (2)
+Task Locations (2)
+
+    - `/home/vikali182/node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Plugin.java`
+            - [advice] Some input files use unchecked or unsafe operations.
+            - [advice] Recompile with -Xlint:unchecked for details.

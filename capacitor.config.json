@@ -1,0 +1,6 @@
+{
+  "appId": "com.vikali182.luckreveal",
+  "appName": "Luck Reveal",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

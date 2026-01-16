@@ -1,0 +1,7 @@
+/* Borra todo lo demás y deja solo esto */
+#root {
+width: 100%;
+height: 100vh;
+margin: 0;
+padding: 0;
+}

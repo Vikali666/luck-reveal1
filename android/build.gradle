@@ -1,0 +1,63 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Esto es necesario para que Android Studio entienda el proyecto
+        classpath 'com.android.tools.build:gradle:8.4.1'
+        classpath 'com.google.gms:google-services:4.4.0'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    afterEvaluate {
+        if (project.hasProperty('android')) {
+            android {
+                compileSdkVersion 35
+                buildToolsVersion "35.0.0"
+            }
+        }
+    }
+
+    project.tasks.withType(JavaCompile) {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+// ESTO ARREGLA LOS ERRORES DE VERSIONES AUTOMÁTICAMENTE
+subprojects {
+    configurations.all {
+        resolutionStrategy.eachDependency { details ->
+            // Forcing Kotlin version to resolve conflicts
+            if (details.requested.group == 'org.jetbrains.kotlin' && details.requested.name.startsWith('kotlin-stdlib')) {
+                details.useVersion '1.8.22'
+            }
+
+            if (details.requested.group == 'androidx.core' && (details.requested.name == 'core' || details.requested.name == 'core-ktx')) {
+                details.useVersion "1.12.0"
+            }
+            if (details.requested.group == 'androidx.activity' && details.requested.name == 'activity') {
+                details.useVersion "1.8.0"
+            }
+            if (details.requested.group == 'androidx.webkit' && details.requested.name == 'webkit') {
+                details.useVersion "1.8.0"
+            }
+            if (details.requested.group == 'androidx.core' && details.requested.name == 'core-splashscreen') {
+                details.useVersion "1.0.1"
+            }
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
