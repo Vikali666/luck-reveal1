@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { Capacitor } from "@capacitor/core";
 import { AdMob, BannerAdSize, BannerAdPosition } from "@capacitor-community/admob";
@@ -40,9 +40,12 @@ const SetupScreen = ({
   onGlobalChat,
   loading
 }) => {
-  const nicknameError = !nickname.trim() ? "Ingresa un apodo"
-  : nickname.trim().length < 2 ? "Mínimo 2 caracteres"
-  : nickname.trim().length > 20 ? "Máximo 20 caracteres"
+  const nicknameError = !nickname.trim()
+  ? "Ingresa un apodo"
+  : nickname.trim().length < 2
+  ? "Mínimo 2 caracteres"
+  : nickname.trim().length > 20
+  ? "Máximo 20 caracteres"
   : null;
 
   return (
@@ -105,44 +108,51 @@ const SetupScreen = ({
 
 // Componente Chat
 const ChatScreen = ({ nickname, onBack }) => {
+  const { user } = useAuth();
+  const { chat = [], loading = false } = useChatListener();
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const endRef = useRef(null);
-  const { user } = useAuth();
-  const { messages: chat, loading } = useChatListener();
 
   useEffect(() => {
-    if (chat.length > 0) {
-      endRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [chat.length]);
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chat]);
 
   const sendMessage = async () => {
-    if (!message.trim() || !user || sending) return;
+    if (!message.trim()) return;
+    if (!user) return alert("Debes iniciar sesión para enviar mensajes");
 
-    const txt = message.trim();
     setSending(true);
-
     try {
       await addDoc(collection(db, CHAT_PATH), {
-        text: txt,
+        uid: user.uid,
         sender: nickname.trim(),
-                   uid: user.uid,
+                   text: message.trim(),
                    createdAt: serverTimestamp()
       });
       setMessage("");
     } catch (error) {
-      console.error("Error enviando:", error);
-      alert("Error al enviar mensaje");
+      console.error("Error sending message:", error);
+      alert("No se pudo enviar el mensaje");
     } finally {
       setSending(false);
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
+    }
+  };
+
+  const formatTime = (ts) => {
+    if (!ts) return "";
+    try {
+      if (ts.toDate) return ts.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    } catch (e) {
+      return "";
     }
   };
 
@@ -166,16 +176,10 @@ const ChatScreen = ({ nickname, onBack }) => {
       chat.map((msg) => (
         <div
         key={msg.id}
-        className={`message ${msg.uid === user?.uid ? 'own' : 'other'}`}
-        >
+        className={`message ${msg.uid === user?.uid ? "own" : "other"}`}>
         <div className="message-header">
         <span className="sender">{msg.sender}</span>
-        <span className="time">
-        {msg.timestamp?.toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit'
-        })}
-        </span>
+        <span className="time">{formatTime(msg.createdAt || msg.timestamp || msg.time)}</span>
         </div>
         <div className="message-content">{msg.text}</div>
         </div>
@@ -231,8 +235,8 @@ export default function App() {
   // Inicializar plugins nativos
   useEffect(() => {
     const initNativePlugins = async () => {
-      if (Capacitor.isNativePlatform()) {
-        try {
+      try {
+        if (Capacitor.isNativePlatform && Capacitor.isNativePlatform()) {
           await LocalNotifications.requestPermissions();
           await AdMob.initialize();
           await AdMob.showBanner({
@@ -241,9 +245,9 @@ export default function App() {
             position: BannerAdPosition.BOTTOM_CENTER,
             margin: 0
           });
-        } catch (error) {
-          console.warn("Error con plugins nativos:", error);
         }
+      } catch (error) {
+        console.warn("Error con plugins nativos:", error);
       }
     };
     initNativePlugins();
